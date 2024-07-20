@@ -1,0 +1,17 @@
+.type-container {
+  width: 100%;
+  display: flex;
+  margin-bottom: 30px;
+
+  button {
+    width: 50%;
+    height: 50px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+
+    &.active {
+      border-bottom: 2px solid teal;
+    }
+  }
+}

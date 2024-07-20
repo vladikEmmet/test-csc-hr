@@ -1,0 +1,21 @@
+.contextMenu {
+  position: absolute;
+  background: white;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+.contextMenu button {
+  padding: 8px 40px;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.contextMenu button:hover {
+  background: #eee;
+}

@@ -1,0 +1,10 @@
+.formContainer {
+  border-left: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+
+  form {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+  }
+}
