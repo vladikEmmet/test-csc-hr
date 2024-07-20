@@ -10,6 +10,8 @@ import { Button } from '../../components/UI/Button/Button';
 import { ButtonVariant } from '../../types/enum';
 import ContextMenu from '../../components/UI/ContextMenu/ContextMenu';
 import { ProductItem } from '../../components/ProductItem/productItem';
+import {Input} from "../../components/UI/Input/Input";
+import useDebounce from "../../hooks/useDebounce";
 
 interface ContextMenuState {
     visible: boolean;
@@ -25,6 +27,10 @@ export const ProductList = () => {
     const [error, setError] = useState('');
     const [contextMenu, setContextMenu] = useState<ContextMenuState>({ visible: false, x: 0, y: 0, item: null });
     const [editable, setEditable] = useState<string | null>(null);
+    const [search, setSearch] = useState<string>('');
+    const debouncedSearchTerm = useDebounce(search, 500);
+    const [filteredItems, setFilteredItems] = useState<IItem[]>([]);
+    const [filteredProducts, setFilteredProducts] = useState<IProduct[]>([]);
 
     const afterEdit = (item: IItem | IProduct) => {
         if ('price' in item) {
@@ -59,6 +65,24 @@ export const ProductList = () => {
 
         fetchData();
     }, []);
+
+    useEffect(() => {
+        if (debouncedSearchTerm) {
+            setFilteredItems(
+                items.filter(item =>
+                    item.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+                )
+            );
+            setFilteredProducts(
+                products.filter(product =>
+                    product.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+                )
+            );
+        } else {
+            setFilteredItems(items);
+            setFilteredProducts(products);
+        }
+    }, [debouncedSearchTerm, items, products]);
 
     useEffect(() => {
         const handleClick = (e: MouseEvent) => {
@@ -138,6 +162,75 @@ export const ProductList = () => {
 
     return (
         <div className={styles.container}>
+            <input
+                type={"text"}
+                name={"search"}
+                placeholder={"Search"}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+            />
+            {search && (
+                <div className={styles['search-results']}>
+                    <h2>Search Results</h2>
+                    <h3>Items</h3>
+                    {
+                        filteredItems.length === 0 ? <p>No items found</p> : (
+                            <table className={styles.table}>
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Description</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {filteredItems.map(item => (
+                                    <ProductItem
+                                        key={item.id}
+                                        id={item.id}
+                                        name={item.name}
+                                        description={item.description}
+                                        onClick={(e) => handleRowClick(e, item)}
+                                        className={contextMenu.item && contextMenu.item.id === item.id ? styles.active : ''}
+                                        isEdit={editable ? editable === item.id : false}
+                                        onCancel={() => setEditable(null)}
+                                        afterSubmit={afterEdit}
+                                    />
+                                ))}
+                                </tbody>
+                            </table>
+                        )
+                    }
+                    <h3>Products</h3>
+                    {
+                        filteredProducts.length === 0 ? <p>No products found</p> : (
+                            <table className={styles.table}>
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Price</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {filteredProducts.map(product => (
+                                    <ProductItem
+                                        key={product.id}
+                                        id={product.id}
+                                        name={product.name}
+                                        price={product.price}
+                                        onClick={(e) => handleRowClick(e, product)}
+                                        isEdit={editable ? editable === product.id : false}
+                                        onCancel={() => setEditable(null)}
+                                        afterSubmit={afterEdit}
+                                    />
+                                ))}
+                                </tbody>
+                            </table>
+                        )
+                    }
+                </div>
+            )}
             <h2>Items List</h2>
             <table className={styles.table}>
                 <thead>
@@ -199,3 +292,4 @@ export const ProductList = () => {
         </div>
     );
 };
+
